@@ -8,7 +8,7 @@ const { AdyenCheckout, Dropin } = window.AdyenWeb;
 let adyenCheckoutInstance = null;
 let dropinInstance = null;
 
-async function startCheckout(countryCode = 'NL') {
+async function startCheckout(countryCode = "NL") {
   try {
     // Create a new session with country parameter
     const session = await fetch(`/api/sessions?country=${encodeURIComponent(countryCode)}`, {
@@ -20,7 +20,7 @@ async function startCheckout(countryCode = 'NL') {
 
     // Get locale for the country
     const locale = getLocaleForCountry(countryCode);
-    
+
     const configuration = {
       session: session,
       clientKey,
@@ -29,7 +29,7 @@ async function startCheckout(countryCode = 'NL') {
       countryCode: countryCode,
       showPayButton: true,
       translations: {
-        "en_US": {
+        en_US: {
           "creditCard.securityCode.label": "CVV/CVC",
         },
       },
@@ -79,22 +79,22 @@ async function startCheckout(countryCode = 'NL') {
     };
 
     // Destroy existing instances if they exist
-    console.log('Cleaning up existing instances...');
+    console.log("Cleaning up existing instances...");
     if (dropinInstance) {
-      console.log('Unmounting existing dropin instance');
+      console.log("Unmounting existing dropin instance");
       dropinInstance.unmount();
       dropinInstance = null;
     }
     if (adyenCheckoutInstance) {
-      console.log('Clearing existing checkout instance');
+      console.log("Clearing existing checkout instance");
       adyenCheckoutInstance = null;
     }
 
     // Clear the container
-    const container = document.getElementById('dropin-container');
+    const container = document.getElementById("dropin-container");
     if (container) {
-      console.log('Clearing dropin container');
-      container.innerHTML = '';
+      console.log("Clearing dropin container");
+      container.innerHTML = "";
     }
 
     // Start the AdyenCheckout and mount the element onto the 'payment' div.
@@ -102,27 +102,25 @@ async function startCheckout(countryCode = 'NL') {
     dropinInstance = new Dropin(adyenCheckoutInstance, {
       paymentMethodsConfiguration: paymentMethodsConfiguration,
     }).mount("#dropin-container");
-    
+
     // Store globally for country picker access
     window.adyenCheckoutInstance = adyenCheckoutInstance;
-    
   } catch (error) {
-    console.error('Dropin initialization error:', error);
-    
+    console.error("Dropin initialization error:", error);
+
     if (window.errorHandler) {
-      const errorInfo = window.errorHandler.handleError(error, 'dropin-initialization');
+      const errorInfo = window.errorHandler.handleError(error, "dropin-initialization");
       window.errorHandler.showErrorNotification(error, {
         onRetry: () => {
           // Retry initialization
           startCheckout(countryCode);
-        }
+        },
       });
     } else {
       alert("Error occurred. Look at console for details.");
     }
   }
 }
-
 
 // Function to handle payment completion redirects
 function handleOnPaymentCompleted(resultCode) {
@@ -154,34 +152,34 @@ function handleOnPaymentFailed(resultCode) {
 }
 
 // Initialize with stored country or default to Netherlands
-const storedCountry = localStorage.getItem('selectedCountry') || 'NL';
-console.log('Dropin initializing with country:', storedCountry);
+const storedCountry = localStorage.getItem("selectedCountry") || "FR";
+console.log("Dropin initializing with country:", storedCountry);
 
 // Ensure we have just the country ID, not an object
-let cleanCountryId = 'NL';
+let cleanCountryId = "NL";
 try {
-    const parsed = JSON.parse(storedCountry);
-    cleanCountryId = parsed.id || parsed;
+  const parsed = JSON.parse(storedCountry);
+  cleanCountryId = parsed.id || parsed;
 } catch (e) {
-    cleanCountryId = storedCountry;
+  cleanCountryId = storedCountry;
 }
 
-console.log('Clean country ID for dropin:', cleanCountryId);
+console.log("Clean country ID for dropin:", cleanCountryId);
 startCheckout(cleanCountryId);
 
 // Listen for country changes from the country picker
-window.addEventListener('countryChanged', (event) => {
-    console.log('Country changed event received in dropin:', event.detail);
-    const newCountryId = event.detail.countryId;
-    console.log('Current country:', cleanCountryId, 'New country:', newCountryId);
-    
-    if (newCountryId && newCountryId !== cleanCountryId) {
-        console.log('Reloading dropin with new country:', newCountryId);
-        cleanCountryId = newCountryId; // Update the current country
-        startCheckout(newCountryId);
-    } else {
-        console.log('No country change needed or invalid country ID');
-    }
+window.addEventListener("countryChanged", (event) => {
+  console.log("Country changed event received in dropin:", event.detail);
+  const newCountryId = event.detail.countryId;
+  console.log("Current country:", cleanCountryId, "New country:", newCountryId);
+
+  if (newCountryId && newCountryId !== cleanCountryId) {
+    console.log("Reloading dropin with new country:", newCountryId);
+    cleanCountryId = newCountryId; // Update the current country
+    startCheckout(newCountryId);
+  } else {
+    console.log("No country change needed or invalid country ID");
+  }
 });
 
-console.log('Dropin event listener registered for country changes');
+console.log("Dropin event listener registered for country changes");

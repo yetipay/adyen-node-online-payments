@@ -8,14 +8,17 @@ const hbs = require("express-handlebars");
 const morgan = require("morgan");
 
 // Import configuration and validation
-const { config, validateConfig } = require('./src/config');
+const { config, validateConfig } = require("./src/config");
 
 // Import error handling
-const { handleServerError } = require('./src/utils/errorHandler');
+const { handleServerError } = require("./src/utils/errorHandler");
 
 // Import controllers
-const paymentsController = require('./src/controllers/paymentsController');
-const webhooksController = require('./src/controllers/webhooksController');
+const paymentsController = require("./src/controllers/paymentsController");
+const webhooksController = require("./src/controllers/webhooksController");
+const YetipayPaymentsApi = require("../YetipayPaymentsApi");
+
+const yetipay = new YetipayPaymentsApi(process.env.YETIPAY_API_BASE_URL, process.env.YETIPAY_API_KEY, process.env.YETIPAY_SITE_ID);
 
 // Initialize Express app
 const app = express();
@@ -23,9 +26,9 @@ const app = express();
 // Validate configuration at startup
 try {
   validateConfig();
-  console.log('Configuration validated successfully');
+  console.log("Configuration validated successfully");
 } catch (error) {
-  console.error('Configuration validation failed:', error.message);
+  console.error("Configuration validation failed:", error.message);
   process.exit(1);
 }
 
@@ -34,7 +37,6 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "/public")));
-
 
 // Handlebars setup
 app.engine(
@@ -61,7 +63,6 @@ app.post("/api/webhooks/notifications", webhooksController.processWebhook);
 
 /* ################# end API ENDPOINTS ###################### */
 
-
 /* ################# CLIENT SIDE ENDPOINTS ###################### */
 
 // Index page
@@ -71,52 +72,54 @@ app.get("/", (req, res) => res.render("index"));
 app.get("/components", (req, res) => res.render("components"));
 
 // Payment method pages
-app.get("/checkout/card", (req, res) =>
+app.get("/checkout/card", async (req, res) =>
   res.render("card", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY
+    clientKey: await yetipay.getClientKey(),
   })
 );
 
-app.get("/checkout/dropin", (req, res) =>
+app.get("/checkout/dropin", async (req, res) => {
+  const clientKey = await yetipay.getClientKey();
+  console.log("Client key:", clientKey);
   res.render("dropin", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY,
-    showCountrySelector: true
-  })
-);
+    clientKey,
+    showCountrySelector: true,
+  });
+});
 
-app.get("/checkout/ideal", (req, res) =>
+app.get("/checkout/ideal", async (req, res) =>
   res.render("ideal", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY
+    clientKey: await yetipay.getClientKey(),
   })
 );
 
-app.get("/checkout/klarna", (req, res) =>
+app.get("/checkout/klarna", async (req, res) =>
   res.render("klarna", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY
+    clientKey: await yetipay.getClientKey(),
   })
 );
 
-app.get("/checkout/sepa", (req, res) =>
+app.get("/checkout/sepa", async (req, res) =>
   res.render("sepa", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY
+    clientKey: await yetipay.getClientKey(),
   })
 );
 
-app.get("/checkout/vipps", (req, res) =>
+app.get("/checkout/vipps", async (req, res) =>
   res.render("vipps", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY
+    clientKey: await yetipay.getClientKey(),
   })
 );
 
-app.get("/checkout/mobilepay", (req, res) =>
+app.get("/checkout/mobilepay", async (req, res) =>
   res.render("mobilepay", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY
+    clientKey: await yetipay.getClientKey(),
   })
 );
 
-app.get("/checkout/googlepay", (req, res) =>
+app.get("/checkout/googlepay", async (req, res) =>
   res.render("googlepay", {
-    clientKey: config.adyen.ADYEN_CLIENT_KEY
+    clientKey: await yetipay.getClientKey(),
   })
 );
 
@@ -124,8 +127,8 @@ app.get("/checkout/googlepay", (req, res) =>
 app.get("/result/:type", (req, res) =>
   res.render("result", {
     type: req.params.type,
-    orderRef: req.query.orderRef || 'N/A',
-    redirectData: req.query.redirectData || null
+    orderRef: req.query.orderRef || "N/A",
+    redirectData: req.query.redirectData || null,
   })
 );
 
@@ -137,9 +140,9 @@ app.use(handleServerError);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
-    error: 'Not found',
-    code: 'NOT_FOUND',
-    path: req.path
+    error: "Not found",
+    code: "NOT_FOUND",
+    path: req.path,
   });
 });
 
@@ -150,5 +153,5 @@ app.listen(port, () => {
   console.log(`Server started -> http://localhost:${port}`);
   console.log(`Environment: ${config.server.environment}`);
   console.log(`Adyen Environment: ${config.adyen.ADYEN_ENVIRONMENT}`);
-  console.log(`Base URL: ${config.server.baseUrl || 'auto-detected'}`);
+  console.log(`Base URL: ${config.server.baseUrl || "auto-detected"}`);
 });

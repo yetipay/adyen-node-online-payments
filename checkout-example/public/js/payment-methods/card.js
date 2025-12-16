@@ -9,16 +9,16 @@ async function createAdyenCheckout(session) {
     environment: "test",
     amount: {
       value: 10000,
-      currency: 'EUR'
+      currency: "EUR",
     },
     locale: "en_US",
-    countryCode: 'NL',
+    countryCode: "NL",
     showPayButton: true,
     translations: {
-      'en_US': {
-        'creditCard.securityCode.label': 'CVV/CVC'
-      }
-    }
+      en_US: {
+        "creditCard.securityCode.label": "CVV/CVC",
+      },
+    },
   });
 
   return AdyenCheckout(configuration);
@@ -55,32 +55,30 @@ function handleOnPaymentFailed(resultCode) {
 
 // Function to start checkout
 async function startCheckout() {
-
   try {
-    const session = await fetch('/api/sessions', {
-      method: 'POST',
+    const session = await fetch("/api/sessions", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-      }
-    }).then(response => response.json());
+        "Content-Type": "application/json",
+      },
+    }).then((response) => response.json());
 
     const checkout = await createAdyenCheckout(session);
     const card = new Card(checkout, {
       // Optional configuration.
       billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
-      showBrandIcon: true, // when false not showing the brand logo 
+      showBrandIcon: true, // when false not showing the brand logo
       hasHolderName: true, // show holder name
       holderNameRequired: true, // make holder name mandatory
       // configure placeholders
-      placeholders: { 
-        cardNumber: '1234 5678 9012 3456',
-        expiryDate: 'MM/YY', 
-        securityCodeThreeDigits: '123', 
-        securityCodeFourDigits: '1234',
-        holderName: 'J. Smith'
-      }
-    }).mount('#component-container');
-
+      placeholders: {
+        cardNumber: "1234 5678 9012 3456",
+        expiryDate: "MM/YY",
+        securityCodeThreeDigits: "123",
+        securityCodeFourDigits: "1234",
+        holderName: "J. Smith",
+      },
+    }).mount("#component-container");
   } catch (error) {
     console.error(error);
     alert("Error occurred. Look at console for details");
