@@ -3,7 +3,7 @@
  * Centralizes all configuration settings and environment variables
  */
 
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 
 // Load environment variables
 dotenv.config({
@@ -18,90 +18,85 @@ const config = {
   server: {
     port: process.env.PORT || 8080,
     baseUrl: process.env.BASE_URL,
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || "development",
   },
 
   // Adyen configuration
   adyen: {
     ADYEN_API_KEY: process.env.ADYEN_API_KEY,
     ADYEN_MERCHANT_ACCOUNT: process.env.ADYEN_MERCHANT_ACCOUNT,
-    ADYEN_CLIENT_KEY: process.env.ADYEN_CLIENT_KEY,
-    ADYEN_HMAC_KEY: process.env.ADYEN_HMAC_KEY,
-    ADYEN_ENVIRONMENT: process.env.NODE_ENV === 'production' ? 'LIVE' : 'TEST'
+
+    ADYEN_ENVIRONMENT: process.env.NODE_ENV === "production" ? "LIVE" : "TEST",
   },
 
   // Payment configuration
   payment: {
-    defaultCurrency: 'EUR',
-    defaultCountry: 'NL',
+    defaultCurrency: "EUR",
+    defaultCountry: "NL",
     defaultAmount: 10000, // 100 EUR in minor units
     supportedCurrencies: {
-      'US': 'USD',
-      'GB': 'GBP',
-      'NO': 'NOK',
-      'SE': 'SEK',
-      'DK': 'DKK',
-      'CH': 'CHF',
-      'JP': 'JPY',
-      'CN': 'CNY',
-      'KR': 'KRW',
-      'BR': 'BRL',
-      'MX': 'MXN',
-      'AU': 'AUD',
-      'CA': 'CAD',
-      'IN': 'INR',
-      'SG': 'SGD',
-      'HK': 'HKD',
-      'MY': 'MYR',
-      'TH': 'THB',
-      'ID': 'IDR',
-      'PH': 'PHP',
-      'VN': 'VND',
-      'RU': 'RUB',
-      'PL': 'PLN',
-      'CZ': 'CZK',
-      'AE': 'AED',
-      'KE': 'KES',
-      'NZ': 'NZD'
-    }
+      US: "USD",
+      GB: "GBP",
+      NO: "NOK",
+      SE: "SEK",
+      DK: "DKK",
+      CH: "CHF",
+      JP: "JPY",
+      CN: "CNY",
+      KR: "KRW",
+      BR: "BRL",
+      MX: "MXN",
+      AU: "AUD",
+      CA: "CAD",
+      IN: "INR",
+      SG: "SGD",
+      HK: "HKD",
+      MY: "MYR",
+      TH: "THB",
+      ID: "IDR",
+      PH: "PHP",
+      VN: "VND",
+      RU: "RUB",
+      PL: "PLN",
+      CZ: "CZK",
+      AE: "AED",
+      KE: "KES",
+      NZ: "NZD",
+    },
   },
 
   // Line items configuration
   lineItems: {
     default: [
       { quantity: 1, amountIncludingTax: 5000, description: "Sunglasses" },
-      { quantity: 1, amountIncludingTax: 5000, description: "Headphones" }
+      { quantity: 1, amountIncludingTax: 5000, description: "Headphones" },
     ],
     vipps: [
       { quantity: 1, amountIncludingTax: 5000, description: "Sunglasses" },
-      { quantity: 1, amountIncludingTax: 5000, description: "Headphones" }
+      { quantity: 1, amountIncludingTax: 5000, description: "Headphones" },
     ],
     mobilepay: [
       { quantity: 1, amountIncludingTax: 5000, description: "Sunglasses" },
-      { quantity: 1, amountIncludingTax: 5000, description: "Headphones" }
-    ]
-  }
+      { quantity: 1, amountIncludingTax: 5000, description: "Headphones" },
+    ],
+  },
 };
 
 /**
  * Validate required configuration
  */
 const validateConfig = () => {
-  const requiredVars = [
-    'YETIPAY_API_KEY',
-    'YETIPAY_API_BASE_URL',
-    'ADYEN_CLIENT_KEY',
-  ];
+  const requiredVars = ["YETIPAY_API_KEY", "YETIPAY_API_BASE_URL", "YETIPAY_SITE_ID"];
 
-  const missing = requiredVars.filter(varName => !process.env[varName]);
-  
+  const missing = requiredVars.filter((varName) => !process.env[varName]);
+
   if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
   }
 
   // HMAC key is optional - only needed for webhook validation
   if (!process.env.ADYEN_HMAC_KEY) {
-    console.log('Note: ADYEN_HMAC_KEY is not set. Webhook validation will be skipped.');
+    console.log("Note: ADYEN_HMAC_KEY is not set. Webhook validation will be skipped.");
   }
 
   return true;
@@ -118,7 +113,7 @@ const getCurrencyForCountry = (countryCode) => {
  * Get line items for payment method
  */
 const getLineItemsForPaymentMethod = (paymentMethod) => {
-  if (paymentMethod === 'vipps') {
+  if (paymentMethod === "vipps") {
     return config.lineItems.vipps;
   }
   return config.lineItems.default;
@@ -132,10 +127,10 @@ const getBaseUrl = (req) => {
   if (config.server.baseUrl) {
     return config.server.baseUrl;
   }
-  
+
   // Use the actual request host and protocol
-  const host = req.get('host');
-  const protocol = req.socket.encrypted ? 'https' : 'http';
+  const host = req.get("host");
+  const protocol = req.socket.encrypted ? "https" : "http";
   return `${protocol}://${host}`;
 };
 
@@ -144,5 +139,5 @@ module.exports = {
   validateConfig,
   getCurrencyForCountry,
   getLineItemsForPaymentMethod,
-  getBaseUrl
+  getBaseUrl,
 };

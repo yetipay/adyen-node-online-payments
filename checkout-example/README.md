@@ -37,7 +37,6 @@ git clone https://github.com/yetipay/adyen-node-online-payments.git
 
 - [yetipay Base URL](https://docs.api.yetipay.me/TODO)
 - [yetipay API key](https://docs.api.yetipay.me/TODO)
-- [Adyen Client Key](https://docs.api.yetipay.me/TODO)
 - [HMAC Key](https://docs.api.yetipay.me/TODO)
 
 Create a `./.env` file with the environment variables.
@@ -45,7 +44,6 @@ Create a `./.env` file with the environment variables.
 ```shell
 export YETIPAY_API_BASE_URL=https://api.yetipay.me
 export YETIPAY_API_KEY=yourYetipayApiKey
-export ADYEN_CLIENT_KEY=yourAdyenClientKey
 export ADYEN_HMAC_KEY=yourHmacKey
 ```
 
